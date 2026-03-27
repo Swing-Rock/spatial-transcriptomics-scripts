@@ -39,4 +39,4 @@ Make sure each sample's file structure is organized as follows:
     - (File) tissue_positions_list.csv
 
 
-many thanks and credits to Alfred Kao for providing the code for workflow and many helps
+lots of thanks and credits to Alfred Kao for providing the code for workflow and many helps
