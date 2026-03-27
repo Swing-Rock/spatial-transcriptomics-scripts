@@ -1,0 +1,122 @@
+source("st_helper.R")
+library(Seurat)
+library(sctransform)
+library(patchwork)
+
+library(SingleR)
+library(celldex)
+
+# INPUT: 
+#   (Large Seurat) Seurat Obj after QC
+#   (str) name of the data set 
+#   (str) output path for graphical output (same as data folder by default)
+# OUTPUT: SeuratObject of .h5 after qc
+# make sure corresponding libraries are already downloaded
+clustering <- function(data_obj, data_name, out_path, single_cell = TRUE) {
+  print("----------Starting clustering----------")
+  ref <- HumanPrimaryCellAtlasData()
+
+  if (single_cell) {
+    print("-----running single cell labeling-----")
+    data_obj <- RunPCA(data_obj, assay = "SCT")
+    data_obj <- RunUMAP(data_obj, reduction = "pca", dims = 1:30)
+  } else {
+    print("-----running cluster level labeling-----")
+    print("clustering")
+    #Playing around with the dimensions of PCA/UMAP can result in different clustering algorithms.
+    data_obj <- RunPCA(data_obj, assay = "SCT")
+    data_obj <- FindNeighbors(data_obj, reduction = "pca", dims = 1:30)
+    data_obj <- FindClusters(data_obj, resolution = 0.5, verbose = FALSE) #changing the resolution changes how broadly or specifically the algorithm clusters the cell populations. A low resolution (close to 0) results in very broad clustering (fewer clusters), while high resolution results in very specific clustering (more clusters)
+    data_obj <- RunUMAP(data_obj, reduction = "pca", dims = 1:30)
+    
+    #Visualization prep
+    combined <- DimPlot(data_obj, reduction = "umap", label = TRUE) |
+      SpatialDimPlot(data_obj, label = TRUE, pt.size.factor = 2.5, label.size = 3)
+    
+    #Table representing the number of cells in each cluster number
+    table(data_obj@active.ident)
+    
+    # Get all cluster IDs
+    clusters <- levels(data_obj)
+    
+    # Find markers for each cluster, store in a list
+    all_markers <- lapply(clusters, function(clust) {
+      FindMarkers(data_obj, ident.1 = clust, min.pct = 0.25)
+    })
+    
+    # Name each element by cluster number
+    names(all_markers) <- clusters
+    print("Done with clustering, starting Single R cluster identification")
+  }
+  
+  test_data <- GetAssayData(data_obj, layer  = "data", assay = "SCT")
+  
+  if (single_cell){
+    pred <- SingleR(
+      test = test_data,
+      ref = ref,
+      labels = ref$label.main,
+    )
+    data_obj$SingleR_label <- pred$labels
+    combined <- (DimPlot(data_obj, reduction = "umap", group.by = "SingleR_label", label = TRUE) |
+                SpatialDimPlot(data_obj, group.by = "SingleR_label", pt.size.factor = 2.5))
+    png(paste0(out_path, "/", data_name, "_cluster_plots.png"), width = 2000, height = 1000, res = 150)
+    
+  } else{
+    pred <- SingleR(
+      test = test_data,
+      ref = ref,
+      labels = ref$label.main,
+      clusters = Idents(data_obj)
+    )
+    cluster_labels <- pred$labels
+    names(cluster_labels) <- levels(data_obj)
+    data_obj <- RenameIdents(data_obj, cluster_labels)
+    combined <- combined / (DimPlot(data_obj, reduction = "umap", label = TRUE) |
+                              SpatialDimPlot(data_obj, label = TRUE, pt.size.factor = 2.5, label.size = 3))
+    png(paste0(out_path, "/", data_name, "_cluster_plots.png"), width = 2000, height = 3000, res = 150)
+  }
+  
+  
+  
+  #visualization
+  print(combined)
+  dev.off()
+
+  print("--------Done with singleR, hope the results are good!----------")
+  
+  #return (data_obj)
+  
+}
+
+# ----------FUNSIES THAT MAKE VIOLIN GRAPH FOR TOP 5 GENES IN EACH CLUSTER----------
+# # keep only the top 5 markers per cluster by log fold change
+# top_markers <- lapply(all_markers, function(df) {
+#   df <- df[order(-df$avg_log2FC), ]   # sort descending by log fold change
+#   head(rownames(df), 5)                # take top 5 gene names
+# })
+# 
+# # draw violin graph
+# vln_list <- list()
+# title_list <- list()
+# 
+# for (clust in clusters) {
+#   genes <- top_markers[[clust]]
+#   print(paste("Cluster", clust, "top markers:", paste(genes, collapse = ", ")))
+#   vln_list[[as.character(clust)]] <- make_v_plot(obj = data_obj, feature = genes, nPerRow = 5, x_text = element_text(hjust = 1))
+#   title_list[[as.character(clust)]] <- title_plot(paste0("Cluster ", clust), 18)
+# }
+# 
+# # combine and output
+# combined <- NULL
+# for (clust in clusters) {
+#   if (is.null(combined)) {
+#     combined <- title_list[[as.character(clust)]] / vln_list[[as.character(clust)]]
+#   } else {
+#     combined <- combined / title_list[[as.character(clust)]] / vln_list[[as.character(clust)]]
+#   }
+# }
+# 
+#   png(paste0(out_path, "/", data_name, "cluster_violins.png"), width = 3000, height = 4000, res = 150)
+# print(combined)
+# dev.off()
