@@ -29,7 +29,7 @@ Ongkeko Lab spatial transcriptomics data processing pipeline
 <img width="918" height="806" alt="image" src="https://github.com/user-attachments/assets/7f8e183e-714f-4d6d-aa4a-b10f5dab0ae2" />
 https://lucid.app/lucidchart/9ca23dbf-cc43-4b66-b452-ce79e9b11e3e/edit?viewport_loc=-547%2C-325%2C3078%2C1476%2C0_0&invitationId=inv_80ce0e20-4ee8-4184-8f4a-6fc41391dc04
 
-
+## file organization
 Make sure each sample's file structure is organized as follows:
 - (Folder) Sample name 
   - (File) (SampleName)_filtered_feature_bc_matrix.h5
@@ -39,4 +39,4 @@ Make sure each sample's file structure is organized as follows:
     - (File) tissue_positions_list.csv
 
 
-special credits to Alfred Kao for providing the code for workflow and many helps
+many thanks and credits to Alfred Kao for providing the code for workflow and many helps
