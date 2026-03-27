@@ -1,4 +1,4 @@
-source("st_helper.R")
+source("scripts/st_helper.R")
 library(Seurat)
 library(sctransform)
 library(patchwork)
@@ -12,22 +12,21 @@ library(celldex)
 #   (str) output path for graphical output (same as data folder by default)
 # OUTPUT: SeuratObject of .h5 after qc
 # make sure corresponding libraries are already downloaded
-clustering <- function(data_obj, data_name, out_path, single_cell = TRUE) {
-  print("----------Starting clustering----------")
+clustering <- function(data_obj, data_name, out_path, single_cell = TRUE, verbose_output = FALSE) {
+  cat("===============Starting clustering===============\n")
   ref <- HumanPrimaryCellAtlasData()
 
   if (single_cell) {
-    print("-----running single cell labeling-----")
-    data_obj <- RunPCA(data_obj, assay = "SCT")
-    data_obj <- RunUMAP(data_obj, reduction = "pca", dims = 1:30)
+    cat("-----running single cell labeling-----\n")
+    data_obj <- RunPCA(data_obj, assay = "SCT", verbose = verbose_output)
+    data_obj <- RunUMAP(data_obj, reduction = "pca", dims = 1:30, verbose = verbose_output)
   } else {
-    print("-----running cluster level labeling-----")
-    print("clustering")
+    cat("-----running cluster level labeling-----\n")
     #Playing around with the dimensions of PCA/UMAP can result in different clustering algorithms.
-    data_obj <- RunPCA(data_obj, assay = "SCT")
+    data_obj <- RunPCA(data_obj, assay = "SCT", verbose = verbose_output)
     data_obj <- FindNeighbors(data_obj, reduction = "pca", dims = 1:30)
-    data_obj <- FindClusters(data_obj, resolution = 0.5, verbose = FALSE) #changing the resolution changes how broadly or specifically the algorithm clusters the cell populations. A low resolution (close to 0) results in very broad clustering (fewer clusters), while high resolution results in very specific clustering (more clusters)
-    data_obj <- RunUMAP(data_obj, reduction = "pca", dims = 1:30)
+    data_obj <- FindClusters(data_obj, resolution = 0.5, verbose = verbose_output) #changing the resolution changes how broadly or specifically the algorithm clusters the cell populations. A low resolution (close to 0) results in very broad clustering (fewer clusters), while high resolution results in very specific clustering (more clusters)
+    data_obj <- RunUMAP(data_obj, reduction = "pca", dims = 1:30, verbose = verbose_output)
     
     #Visualization prep
     combined <- DimPlot(data_obj, reduction = "umap", label = TRUE) |
@@ -46,7 +45,7 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE) {
     
     # Name each element by cluster number
     names(all_markers) <- clusters
-    print("Done with clustering, starting Single R cluster identification")
+    cat("-----Done with clustering, starting Single R cluster identification-----\n")
   }
   
   test_data <- GetAssayData(data_obj, layer  = "data", assay = "SCT")
@@ -60,7 +59,7 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE) {
     data_obj$SingleR_label <- pred$labels
     combined <- (DimPlot(data_obj, reduction = "umap", group.by = "SingleR_label", label = TRUE) |
                 SpatialDimPlot(data_obj, group.by = "SingleR_label", pt.size.factor = 2.5))
-    png(paste0(out_path, "/", data_name, "_cluster_plots.png"), width = 2000, height = 1000, res = 150)
+    png(paste0(out_path, "/", data_name, "_single_cell_cluster_plots.png"), width = 2000, height = 1000, res = 150)
     
   } else{
     pred <- SingleR(
@@ -74,7 +73,7 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE) {
     data_obj <- RenameIdents(data_obj, cluster_labels)
     combined <- combined / (DimPlot(data_obj, reduction = "umap", label = TRUE) |
                               SpatialDimPlot(data_obj, label = TRUE, pt.size.factor = 2.5, label.size = 3))
-    png(paste0(out_path, "/", data_name, "_cluster_plots.png"), width = 2000, height = 3000, res = 150)
+    png(paste0(out_path, "/", data_name, "_sgroup_cluster_plots.png"), width = 3000, height = 2000, res = 150)
   }
   
   
@@ -83,7 +82,7 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE) {
   print(combined)
   dev.off()
 
-  print("--------Done with singleR, hope the results are good!----------")
+  cat("==========Done with singleR, hope the results are good!==========\n")
   
   #return (data_obj)
   

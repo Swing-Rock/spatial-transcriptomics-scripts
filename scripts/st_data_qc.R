@@ -1,4 +1,4 @@
-source("st_helper.R")
+source("scripts/st_helper.R")
 library(Seurat)
 library(patchwork)
 
@@ -8,18 +8,11 @@ library(patchwork)
 #   (bool) if graphical output is desired (true by default) 
 #   (str) output path for graphical output (same as data folder by default)
 # OUTPUT: SeuratObject of .h5 after qc
-# DATA FOLDER FORMAT:
-#   (Folder) Sample name
-#   -> (File) (SampleName)_filtered_feature_bc_matrix.h5
-#   -> (Folder) (SampleName)
-#   ->-> (File) tissue_lowres_image.png
-#   ->-> (File) scalefactors_json.json
-#   ->-> (File) tissue_positions_list.csv
 # make sure corresponding libraries are already downloaded
 
-run_qc <- function(data_path, data_name, graph_output = TRUE, out_path = data_path) {
+run_qc <- function(data_path, data_name, graph_output = TRUE, out_path = data_path, verbose_output = FALSE) {
   
-  print("----------Starting QC----------")
+  cat("===============Starting QC===============\n")
   
   #set crucial vars
   dataset_name <- data_name
@@ -28,16 +21,18 @@ run_qc <- function(data_path, data_name, graph_output = TRUE, out_path = data_pa
   output_path <- out_path
   
   #qc
-  print("running qc")
-  seuObj <- Load10X_Spatial(data.dir, filename="GSM8633891_filtered_feature_bc_matrix.h5")
+  cat("running qc \n")
+  seuObj <- Load10X_Spatial(data.dir, filename= paste0(data_name, "_filtered_feature_bc_matrix.h5"))
   seuObj[["percent.mt"]] <- PercentageFeatureSet(object = seuObj, pattern = "^MT-")
   seuObj[["percent.ribo"]] <- PercentageFeatureSet(seuObj, pattern = "^RP[SL]")
   sub_seuObj <- subset(seuObj, subset = nFeature_Spatial < 7500 & nFeature_Spatial > 200 & nCount_Spatial < 50000 & nCount_Spatial > 250 & percent.mt < 15 & percent.ribo < 40)
-  norm_sub_seuObj <- SCTransform(sub_seuObj, assay = "Spatial")
+  #normalize
+  cat("normalizing\n")
+  norm_sub_seuObj <- SCTransform(sub_seuObj, assay = "Spatial", verbose = verbose_output)
   
   #plotting
   if (graphical_output){
-    print("plotting")
+    cat("plotting\n")
     row_len = 4
     features = c("nFeature_Spatial", "nCount_Spatial", "percent.mt", "percent.ribo")
     
@@ -63,7 +58,7 @@ run_qc <- function(data_path, data_name, graph_output = TRUE, out_path = data_pa
   
   } 
   rm(seuObj, sub_seuObj, combined, p1, p2, p3, s2, s3, t1, t2, t3)
-  print("----------QC done!----------")
+  cat("===============QC done!===============\n")
   return(norm_sub_seuObj)
 }
 
