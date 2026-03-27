@@ -1,7 +1,17 @@
-# spatial-transcriptomics-scripts
+## spatial-transcriptomics-scripts
 Ongkeko Lab spatial transcriptomics data processing pipeline
 
-in st_master, define path and name variables
+# st_master 
+- define path and name variables
+- calls other scripts
+
+# st_data_qc
+- quality control thresholds:
+  - nFeature_Spatial less than 200 or greater than 7,500
+  - nCount_Spatial less than 250 or greater than 50,000
+  - percent.mt > 15%
+  - percent.ribo > 40%
+- normalize data using SCTransform 
 
 flow chart of script dependencies
 <img width="1126" height="768" alt="image" src="https://github.com/user-attachments/assets/b6bd4170-672e-414d-8820-f13739305e72" />
