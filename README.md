@@ -9,12 +9,12 @@ https://lucid.app/lucidchart/9ca23dbf-cc43-4b66-b452-ce79e9b11e3e/edit?viewport_
 
 Make sure each sample's file structure is organized as follows:
 
-(Folder) Sample name
--> (File) (SampleName)_filtered_feature_bc_matrix.h5
--> (Folder) (SampleName)
-->-> (File) tissue_lowres_image.png
-->-> (File) scalefactors_json.json
-->-> (File) tissue_positions_list.csv
+(Folder) Sample name 
+  - (File) (SampleName)_filtered_feature_bc_matrix.h5
+  - (Folder) (SampleName)
+    - (File) tissue_lowres_image.png
+    - (File) scalefactors_json.json
+    - (File) tissue_positions_list.csv
 
 
 special credits to Alfred Kao for providing the code for workflow and many helps
