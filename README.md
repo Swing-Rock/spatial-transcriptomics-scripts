@@ -1,17 +1,27 @@
-## spatial-transcriptomics-scripts
+# spatial-transcriptomics-scripts
 Ongkeko Lab spatial transcriptomics data processing pipeline
 
-# st_master 
+## st_master 
 - define path and name variables
 - calls other scripts
 
-# st_data_qc
+## st_data_qc
 - quality control thresholds:
   - nFeature_Spatial less than 200 or greater than 7,500
   - nCount_Spatial less than 250 or greater than 50,000
   - percent.mt > 15%
   - percent.ribo > 40%
-- normalize data using SCTransform 
+- normalize data using SCTransform
+
+## st_clustering_qc
+- uses Human Primary Cell Atlas Data as reference, compares target cell against reference to identify cell type
+- **single cell labeling**: each cell is labeled a cell type before dimensional reduction
+- **cluster labeling**: each cell is assigned to a cluster before each cluster is given a cell type
+    - FindNeighbors dims = 1:30
+    - FindCLusters resolution = 0.5
+
+## st_helper
+- graphing functions for formatting 
 
 flow chart of script dependencies
 <img width="918" height="806" alt="image" src="https://github.com/user-attachments/assets/7f8e183e-714f-4d6d-aa4a-b10f5dab0ae2" />
