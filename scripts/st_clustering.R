@@ -1,6 +1,5 @@
 source("scripts/st_helper.R")
 library(Seurat)
-library(sctransform)
 library(patchwork)
 
 library(SingleR)

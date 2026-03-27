@@ -12,7 +12,7 @@ library(patchwork)
 
 run_qc <- function(data_path, data_name, graph_output = TRUE, out_path = data_path, verbose_output = FALSE) {
   
-  cat("===============Starting QC===============\n")
+  cat("===============Starting QC for sample", data_name, "===============\n")
   
   #set crucial vars
   dataset_name <- data_name
@@ -58,7 +58,7 @@ run_qc <- function(data_path, data_name, graph_output = TRUE, out_path = data_pa
   
   } 
   rm(seuObj, sub_seuObj, combined, p1, p2, p3, s2, s3, t1, t2, t3)
-  cat("===============QC done!===============\n")
+  cat("=============== QC done for sample", data_name, "===============\n")
   return(norm_sub_seuObj)
 }
 

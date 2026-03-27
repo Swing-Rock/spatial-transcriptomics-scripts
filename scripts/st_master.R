@@ -1,10 +1,12 @@
 source("scripts/st_data_qc.R")
 source("scripts/st_clustering.R")
+source("scripts/st_merge_data.R")
 
-data_folder = "C:/ongkeko lab works/spatial transcriptomics/data set 1/GSM8633893"
+
+data_folder = "C:/ongkeko lab works/spatial transcriptomics/data set 1"
 picture_folder = "C:/ongkeko lab works/spatial transcriptomics/data set 1/output"
 start_time <- Sys.time()
-batch_processing <- FALSE
+batch_processing <- TRUE
 
 # ---------- FOR RUNNING SCRIPT ON A SINGLE SAMPLE: ----------
 # DATA FOLDER FORMAT:
@@ -26,31 +28,47 @@ batch_processing <- FALSE
 # data_folder IS THE whatever_name FOLDER
 
 
+
 if (batch_processing){
-  # Get all subdirectories (full paths)
-  folders <- list.dirs(data_folder, full.names = TRUE, recursive = FALSE)
+  
+  # Get all files in the folder (not recursive)
+  folders <- list.files(data_folder, full.names = TRUE)
+  #initiate variables
   n <- 0
+  file_list <- list()
+  data_list <- list()
   
   # Loop through folders
   for (folder in folders) {
-    
     # Get folder name only
     folder_name <- basename(folder)
-    
     # Skip the "output" folder
     if (folder_name == basename(picture_folder)) {
       next
     }
-    cat("\n\n::::::::::::::: Processing sample:", folder_name, " :::::::::::::::\n")
+    file_list[[folder_name]] <- folder   # key = file name, value = absolute path
     n = n + 1
-    data <- run_qc(folder, folder_name, TRUE, picture_folder)
-    clustering(data_obj = data, data_name = folder_name, out_path = picture_folder, single_cell = FALSE)
-    
   }
-  cat(n, " SAMPLE PROCESSED\n")
+  cat(n, "SAMPLES WILL BE PROCESSED\n")
+  
+  
+  # run QC on each sample
+  for (name in names(file_list)) {
+    cat("\n\n::::::::::::::: Processing sample:", name, " :::::::::::::::\n")
+    data <- run_qc(file_list[[name]], name, TRUE, picture_folder)
+    data_list[[name]] <- data
+    data_list[[name]]$orig.ident <- name
+  }
+  cat("::::::::::DONE WITH QC, MERGING SAMPLES::::::::::\n")
+  
+  merge_dataset(data_list, picture_folder)
+  
+    
+    #clustering(data_obj = data, data_name = folder_name, out_path = picture_folder, single_cell = FALSE)
+    
 } else {
   data_name = basename(data_folder)
-  data3 <- run_qc(data_folder, data_name, TRUE, picture_folder)
+  data <- run_qc(data_folder, data_name, TRUE, picture_folder)
   clustering(data, data_name, picture_folder)
 }
 
