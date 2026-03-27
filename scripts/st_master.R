@@ -8,6 +8,7 @@ picture_folder = "C:/ongkeko lab works/spatial transcriptomics/data set 1/output
 start_time <- Sys.time()
 batch_processing <- TRUE
 
+
 # ---------- FOR RUNNING SCRIPT ON A SINGLE SAMPLE: ----------
 # DATA FOLDER FORMAT:
 #   (Folder) Sample name
@@ -59,12 +60,12 @@ if (batch_processing){
     data_list[[name]] <- data
     data_list[[name]]$orig.ident <- name
   }
-  cat("::::::::::DONE WITH QC, MERGING SAMPLES::::::::::\n")
+  rm(data)
+  cat("\n\n::::::::::DONE WITH QC, MERGING SAMPLES::::::::::\n")
   
-  merge_dataset(data_list, picture_folder)
-  
-    
-    #clustering(data_obj = data, data_name = folder_name, out_path = picture_folder, single_cell = FALSE)
+  merged_data <- merge_dataset(data_list, picture_folder)
+  merged_data <- FindVariableFeatures(merged_data, assay = "SCT", selection.method = "vst", nfeatures = 3000)
+  clustering(data_obj = merged_data, data_name = "merged", out_path = picture_folder, single_cell = TRUE)
     
 } else {
   data_name = basename(data_folder)

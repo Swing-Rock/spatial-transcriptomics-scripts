@@ -57,7 +57,7 @@ run_qc <- function(data_path, data_name, graph_output = TRUE, out_path = data_pa
     dev.off()
   
   } 
-  rm(seuObj, sub_seuObj, combined, p1, p2, p3, s2, s3, t1, t2, t3)
+  #rm(seuObj, sub_seuObj, combined, p1, p2, p3, s2, s3, t1, t2, t3)
   cat("=============== QC done for sample", data_name, "===============\n")
   return(norm_sub_seuObj)
 }
