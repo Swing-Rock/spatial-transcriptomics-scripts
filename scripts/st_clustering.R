@@ -64,8 +64,9 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE, verbos
     cat("plotting\n")
     #plot combined annotated umap
     combined <- (DimPlot(data_obj, reduction = "umap", group.by = "SingleR_label", label = TRUE)) 
-    png(paste0(out_path, "/", data_name, "_annotated_merged_cluster_plot.png"), width = 3000, height = 2000, res = 150)
+    png(paste0(out_path, "/", data_name, "_annotated_merged_cluster_plot.png"), width = 1500, height = 1000, res = 150)
     print(combined)
+    dev.off()
     
     
     #plot annotated spatial plot for each sample
@@ -74,8 +75,10 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE, verbos
     n <- length(data_obj@images)
     rows <- ceiling(n / cols)
     
-    png(paste0(out_path, "/", data_name, "_annotated_sample_spatial_plots.png"), width = cols*400, height = 500*rows, res = 150)
+    png(paste0(out_path, "/", data_name, "_annotated_sample_spatial_plots.png"), width = cols*750, height = 500*rows, res = 150)
     print(combined)
+    dev.off()
+    
     
   } else{ 
     pred <- SingleR(
@@ -91,9 +94,9 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE, verbos
                               SpatialDimPlot(data_obj, label = TRUE, pt.size.factor = 2.5, label.size = 3))
     png(paste0(out_path, "/", data_name, "_annotated_group_cluster_plots.png"), width = 3000, height = 2000, res = 150)
     print(combined)
+    dev.off()
   }
   
-  dev.off()
   cat("==========Done with singleR, hope the results are good!==========\n")
   
   #return (data_obj)
