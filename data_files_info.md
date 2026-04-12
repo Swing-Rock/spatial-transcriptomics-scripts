@@ -2,15 +2,20 @@
 This file describes the different files in GSE281978 (Visium) and GSE300147 (Xenium)
 
 ## 10x Genomics Visium Spatial Transcriptomics of HNSCC
-  - nFeature_Spatial less than 200 or greater than 7,500
-  - nCount_Spatial less than 250 or greater than 50,000
-  - percent.mt > 15%
-  - percent.ribo > 40%
-- normalize data using SCTransform  
+- ⭐ **filtered_feature_bc_matrix**: main gene expression matrix that contains Genes × spots matrix, Spot barcodes, Counts per gene per spot
+- 🖼️ **tissue_positions_list.csv**: Maps spots to coordinates that contains Spot barcode, x/y coordinates, and Whether the spot is on tissue or not
+  - Used for SpatialFeaturePlot and Mapping expression to tissue
+- 🖼️ **tissue_hires_image.png**: High-resolution tissue image Used for Overlay gene expression on tissue
+- 🖼️ **tissue_lowres_image.png**: Low-resolution version of the tissue image Used for Quick visualization
+- 🖼️ **scalefactors_json.json**: Scaling info between image + coordinates thqat Convert pixel coordinates to spot coordinates
+  - it Ensures spots align correctly on the image
+- **aligned_fiducials.jpg**: Alignment reference markers that Shows fiducial spots used during imaging
+  - Mostly used for Quality control, Not used in most analyses
+- **detected_tissue_image.jpg**: Binary tissue mask that Shows which areas are tissue vs background
+  - Helps filter out non-tissue spots
 
 ## Xenium Spatial Transcriptomics of HNSCC
-- **cell_feature_matrix.h5**: main gene expression matrix that contains Genes × cells count matrix, Cell barcodes, and Gene names
-  - ⭐ This is the most important file! 
+- ⭐ **cell_feature_matrix.h5**: main gene expression matrix that contains Genes × cells count matrix, Cell barcodes, and Gene names
 - **cells.parquet**: Metadata for each cell that contains Cell IDs, Coordinates (x, y), Cell area, and QC metrics
   - Links expression data to spatial position
   - Used for Adding metadata to Seurat, Filtering cells, and Spatial plotting
