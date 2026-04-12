@@ -7,6 +7,7 @@ data_folder = "C:/ongkeko lab works/spatial transcriptomics/data set 1"
 picture_folder = "C:/ongkeko lab works/spatial transcriptomics/data set 1/output"
 start_time <- Sys.time()
 batch_processing <- TRUE
+HPV_plus_samples <- c("GSM8633893", "GSM8633894")
 
 
 # ---------- FOR RUNNING SCRIPT ON A SINGLE SAMPLE: ----------

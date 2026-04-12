@@ -17,6 +17,7 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE, verbos
 
   if (single_cell) {
     cat("-----running single cell labeling-----\n")
+    cat("clustering\n")
     data_obj <- RunPCA(data_obj, assay = "SCT", verbose = verbose_output)
     data_obj <- RunUMAP(data_obj, reduction = "pca", dims = 1:30, verbose = verbose_output)
   } else {
@@ -50,17 +51,33 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE, verbos
   test_data <- GetAssayData(data_obj, layer  = "data", assay = "SCT")
   
   if (single_cell){
+    cat("running singleR\n")
     pred <- SingleR(
       test = test_data,
       ref = ref,
       labels = ref$label.main,
     )
+    cat("adding singleR label to data_obj\n")
     data_obj$SingleR_label <- pred$labels
-    combined <- (DimPlot(data_obj, reduction = "umap", group.by = "SingleR_label", label = TRUE) |
-                SpatialDimPlot(data_obj, group.by = "SingleR_label", pt.size.factor = 2.5))
-    png(paste0(out_path, "/", data_name, "_single_cell_cluster_plots.png"), width = 2000, height = 1000, res = 150)
     
-  } else{
+    #visualization
+    cat("plotting\n")
+    #plot combined annotated umap
+    combined <- (DimPlot(data_obj, reduction = "umap", group.by = "SingleR_label", label = TRUE)) 
+    png(paste0(out_path, "/", data_name, "_annotated_merged_cluster_plot.png"), width = 3000, height = 2000, res = 150)
+    print(combined)
+    
+    
+    #plot annotated spatial plot for each sample
+    cols <- 3
+    combined <- (SpatialDimPlot(data_obj, group.by = "SingleR_label", pt.size.factor = 2.5, ncol = cols))
+    n <- length(data_obj@images)
+    rows <- ceiling(n / cols)
+    
+    png(paste0(out_path, "/", data_name, "_annotated_sample_spatial_plots.png"), width = cols*400, height = 500*rows, res = 150)
+    print(combined)
+    
+  } else{ 
     pred <- SingleR(
       test = test_data,
       ref = ref,
@@ -72,15 +89,11 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE, verbos
     data_obj <- RenameIdents(data_obj, cluster_labels)
     combined <- combined / (DimPlot(data_obj, reduction = "umap", label = TRUE) |
                               SpatialDimPlot(data_obj, label = TRUE, pt.size.factor = 2.5, label.size = 3))
-    png(paste0(out_path, "/", data_name, "_sgroup_cluster_plots.png"), width = 3000, height = 2000, res = 150)
+    png(paste0(out_path, "/", data_name, "_annotated_group_cluster_plots.png"), width = 3000, height = 2000, res = 150)
+    print(combined)
   }
   
-  
-  
-  #visualization
-  print(combined)
   dev.off()
-
   cat("==========Done with singleR, hope the results are good!==========\n")
   
   #return (data_obj)
