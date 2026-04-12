@@ -5,6 +5,10 @@ This file describes the different files in GSE281978 (Visium) and GSE300147 (Xen
 - ⭐ **filtered_feature_bc_matrix**: main gene expression matrix that contains Genes × spots matrix, Spot barcodes, Counts per gene per spot
 - 🖼️ **tissue_positions_list.csv**: Maps spots to coordinates that contains Spot barcode, x/y coordinates, and Whether the spot is on tissue or not
   - Used for SpatialFeaturePlot and Mapping expression to tissue
+  - *col 1* (str): barcode
+  - *col 2* (bool): in_tissue
+  - *col 3, 4* (int): array_row, array_col: grid coordinates that describe where the spot sits on the Visium hexagonal array
+  - *col 5, 6* (int): pxl_row, pxl_col: These are pixel coordinates in the FULL-resolution (hires) image that map directly onto the high-res image
 - 🖼️ **tissue_hires_image.png**: High-resolution tissue image Used for Overlay gene expression on tissue
 - 🖼️ **tissue_lowres_image.png**: Low-resolution version of the tissue image Used for Quick visualization
 - 🖼️ **scalefactors_json.json**: Scaling info between image + coordinates thqat Convert pixel coordinates to spot coordinates
