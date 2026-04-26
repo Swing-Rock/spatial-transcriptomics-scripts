@@ -1,4 +1,4 @@
-source("scripts/st_helper.R")
+source("visium_scripts/st_helper.R")
 library(Seurat)
 library(patchwork)
 
@@ -39,8 +39,10 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE, verbos
     clusters <- levels(data_obj)
     
     # Find markers for each cluster, store in a list
+    data_obj <- PrepSCTFindMarkers(data_obj)
+    
     all_markers <- lapply(clusters, function(clust) {
-      FindMarkers(data_obj, ident.1 = clust, min.pct = 0.25)
+      FindMarkers(data_obj, ident.1 = clust, min.pct = 0.25, assay = "SCT")
     })
     
     # Name each element by cluster number

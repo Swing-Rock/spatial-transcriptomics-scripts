@@ -1,4 +1,4 @@
-source("scripts/st_helper.R")
+source("visium_scripts/st_helper.R")
 library(Seurat)
 library(patchwork)
 

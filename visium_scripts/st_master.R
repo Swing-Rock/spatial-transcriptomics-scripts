@@ -1,7 +1,6 @@
-source("scripts/st_data_qc.R")
-source("scripts/st_clustering.R")
-source("scripts/st_merge_data.R")
-
+source("visium_scripts/st_data_qc.R")
+source("visium_scripts/st_clustering.R")
+source("visium_scripts/st_merge_data.R")
 
 data_folder = "C:/ongkeko lab works/spatial transcriptomics/data set 1"
 picture_folder = "C:/ongkeko lab works/spatial transcriptomics/data set 1/output"
