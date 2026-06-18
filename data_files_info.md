@@ -17,6 +17,9 @@ This file describes the different files in GSE281978 (Visium) and GSE300147 (Xen
   - Mostly used for Quality control, Not used in most analyses
 - **detected_tissue_image.jpg**: Binary tissue mask that Shows which areas are tissue vs background
   - Helps filter out non-tissue spots
+- **raw_feature_barcodes.tsv**:
+- **raw_feature_features.tsv**: 
+- **raw_feature_matrix.mtx**: 
 
 ## Xenium Spatial Transcriptomics of HNSCC
 - ⭐ **cell_feature_matrix.h5**: main gene expression matrix that contains Genes × cells count matrix, Cell barcodes, and Gene names
