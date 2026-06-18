@@ -29,8 +29,8 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE, verbos
     data_obj <- RunUMAP(data_obj, reduction = "pca", dims = 1:30, verbose = verbose_output)
     
     #Visualization prep
-    combined <- DimPlot(data_obj, reduction = "umap", label = TRUE) |
-      SpatialDimPlot(data_obj, label = TRUE, pt.size.factor = 2.5, label.size = 3)
+    combined <- DimPlot(data_obj, reduction = "umap", label = TRUE) 
+      #| SpatialDimPlot(data_obj, label = TRUE, pt.size.factor = 2.5, label.size = 3)
     
     #Table representing the number of cells in each cluster number
     table(data_obj@active.ident)
@@ -62,6 +62,8 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE, verbos
     cat("adding singleR label to data_obj\n")
     data_obj$SingleR_label <- pred$labels
     
+    print(sort(table(data_obj@meta.data[["SingleR_label"]]), decreasing = TRUE))
+    
     #visualization
     cat("plotting\n")
     #plot combined annotated umap
@@ -92,16 +94,16 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE, verbos
     cluster_labels <- pred$labels
     names(cluster_labels) <- levels(data_obj)
     data_obj <- RenameIdents(data_obj, cluster_labels)
-    combined <- combined / (DimPlot(data_obj, reduction = "umap", label = TRUE) |
-                              SpatialDimPlot(data_obj, label = TRUE, pt.size.factor = 2.5, label.size = 3))
-    png(paste0(out_path, "/", data_name, "_annotated_group_cluster_plots.png"), width = 3000, height = 2000, res = 150)
+    combined <- combined / (DimPlot(data_obj, reduction = "umap", label = TRUE) )
+                            # | SpatialDimPlot(data_obj, label = TRUE, pt.size.factor = 2.5, label.size = 3))
+    png(paste0(out_path, "/", data_name, "_annotated_group_cluster_plots.png"), width = 750, height = 1000, res = 150)
     print(combined)
     dev.off()
   }
   
   cat("==========Done with singleR, hope the results are good!==========\n")
   
-  #return (data_obj)
+  return (data_obj)
   
 }
 
