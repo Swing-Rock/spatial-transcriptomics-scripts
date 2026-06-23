@@ -3,12 +3,15 @@ source("visium_scripts/st_clustering.R")
 source("visium_scripts/st_merge_data.R")
 source("visium_scripts/st_hpv_pathway_analysis.R")
 source("visium_scripts/st_deconvolution.R")
+source("scripts/tcga_survival.R")
+
 
 # define path for everything 
 # data folder
-data_folder = "C:/ongkeko lab works/spatial transcriptomics/data set 1" 
+data_folder = "C:/ongkeko lab works/spatial transcriptomics/GSE281978" 
 # graphical output folder
-picture_folder = "C:/ongkeko lab works/spatial transcriptomics/data set 1/output"
+picture_folder = "C:/ongkeko lab works/spatial transcriptomics/GSE281978/output"
+dir.create(picture_folder, showWarnings = FALSE, recursive = TRUE)
 # data checkpoint folder
 cache_folder  = file.path(picture_folder, "cache") 
 dir.create(cache_folder, showWarnings = FALSE, recursive = TRUE)
@@ -154,6 +157,12 @@ single_sample_cluster <- function(data, data_name){
 
 
 hpv_analysis <- function(merged_data, deconvolution){
+  hpv_cache <- file.path(cache_folder, "hpv_analysis.rds")
+  if (file.exists(hpv_cache)) {
+    cat("\n\n::::::::::LOADING HPV ANALYSIS FROM CACHE::::::::::\n")
+    return(readRDS(hpv_cache))
+  }
+  
   cat("\n\n::::::::::STARTING HPV PATHWAY ANALYSIS::::::::::\n")
   
   # 1. Tag each spot with HPV status based on sample ID
@@ -193,6 +202,15 @@ hpv_analysis <- function(merged_data, deconvolution){
   merged_data <- run_spatial_scoring(merged_data, go_results, picture_folder)
   
   cat("\n\n::::::::::HPV PATHWAY ANALYSIS COMPLETE::::::::::\n")
+  
+  result <- list(
+    merged_data  = merged_data,
+    go_results   = go_results,
+    kegg_results = kegg_results
+  )
+  saveRDS(result, hpv_cache)
+  cat("\n\nHPV analysis cache saved to:", hpv_cache, "\n")
+  return(result)
 }
 #--------------------end of functions--------------------
 
@@ -235,8 +253,14 @@ if (batch_processing){
   merged_data = single_sample_cluster(dataObj, data_name)
 }
 
-hpv_analysis(merged_data, deconvolution)
+hpv_results <- hpv_analysis(merged_data, deconvolution)
 
+run_tcga_survival(
+  go_results     = hpv_results$go_results,
+  cache_folder   = cache_folder,
+  picture_folder = picture_folder,
+  stratify_hpv   = TRUE
+)
 
 
 end_time <- Sys.time()

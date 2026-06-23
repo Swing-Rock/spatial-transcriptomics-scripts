@@ -1,7 +1,11 @@
 # ============================================================
 # st_hpv_pathway_analysis.R
 # Differential expression + GO/KEGG pathway enrichment
-# between HPV+ and HPV- malignant spots (Visium)
+# between HPV+ and HPV- malignant spots
+#
+# Supports platform = "visium" (default) or "xenium":
+#   visium  → assay "Spatial",  SpatialFeaturePlot for scoring maps
+#   xenium  → assay "SCT",      ImageFeaturePlot   for scoring maps
 # ============================================================
 # Dependencies: Seurat, clusterProfiler, org.Hs.eg.db, enrichplot, ggplot2
 # Install if needed:
@@ -92,17 +96,19 @@ subset_malignant <- function(seurat_obj, deconv, malignant_labels = NULL) {
 
 # ── Step 3: Differential expression (HPV+ vs HPV-) ───────────────────────────
 
-run_de <- function(malignant, out_path) {
+run_de <- function(malignant, out_path, platform = "visium") {
   cat("----------running DE----------")
-  
+
+  de_assay <- if (platform == "xenium") "SCT" else "Spatial"
+
   Idents(malignant) <- "hpv_status"
   
   de_results <- FindMarkers(
     malignant,
     ident.1         = "HPV_pos",
     ident.2         = "HPV_neg",
-    assay           = "Spatial",
-    layer           = "data",    # ← "slot" → "layer" in Seurat v5
+    assay           = de_assay,
+    layer           = "data",
     test.use        = "wilcox",
     min.pct         = 0.1,
     logfc.threshold = LFC_CUTOFF
@@ -229,7 +235,7 @@ run_kegg <- function(de_results, out_path) {
 
 # ── Step 6: Spatial pathway scoring (GSVA / module scoring) ──────────────────
 
-run_spatial_scoring <- function(seurat_obj, go_results, out_path) {
+run_spatial_scoring <- function(seurat_obj, go_results, out_path, platform = "visium") {
   cat("----------running spatial scoring----------")
   
   # Extract top GO gene sets for HPV+ and HPV- enriched programs
@@ -244,7 +250,7 @@ run_spatial_scoring <- function(seurat_obj, go_results, out_path) {
   pos_sets <- get_geneset(go_results$HPV_pos)
   neg_sets <- get_geneset(go_results$HPV_neg)
 
-  # Score each spot using Seurat AddModuleScore
+  # Score each spot/cell using Seurat AddModuleScore, then plot spatially
   score_and_plot <- function(gene_sets, label, obj) {
     for (term_name in names(gene_sets)) {
       genes <- gene_sets[[term_name]]
@@ -263,16 +269,27 @@ run_spatial_scoring <- function(seurat_obj, go_results, out_path) {
       n_col    <- min(n_images, 3)
       n_row    <- ceiling(n_images / n_col)
       fig_w    <- n_col * 5
-      fig_h    <- n_row * 4 + 1.5   # extra for title
+      fig_h    <- n_row * 4 + 1.5
 
-      p <- SpatialFeaturePlot(obj, features = actual_col,
-                              pt.size.factor = 1.3, ncol = n_col) +
-        labs(title = paste(label, "—", term_name)) +
-        theme(
-          legend.position = "right",
-          plot.title      = element_text(size = 14, face = "bold"),
-          strip.text      = element_text(size = 10)
-        )
+      if (platform == "xenium") {
+        p <- ImageFeaturePlot(obj, features = actual_col, ncol = n_col) +
+          labs(title = paste(label, "—", term_name)) +
+          theme(
+            legend.position = "right",
+            plot.title      = element_text(size = 14, face = "bold"),
+            strip.text      = element_text(size = 10)
+          )
+      } else {
+        p <- SpatialFeaturePlot(obj, features = actual_col,
+                                pt.size.factor = 1.3, ncol = n_col) +
+          labs(title = paste(label, "—", term_name)) +
+          theme(
+            legend.position = "right",
+            plot.title      = element_text(size = 14, face = "bold"),
+            strip.text      = element_text(size = 10)
+          )
+      }
+
       ggsave(file.path(out_path, paste0("spatial_score_", score_col, ".png")),
              p, width = fig_w, height = fig_h, dpi = 150)
     }

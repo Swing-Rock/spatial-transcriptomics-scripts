@@ -16,6 +16,12 @@ make_sf_plot <- function (SeruratObj, feature, nPerRow){
            theme(legend.position = "right"))
 }
 
+# Spatial image feature plot for Xenium (ImageFeaturePlot)
+make_if_plot <- function(xenium_obj, features, ncol = 3) {
+  ImageFeaturePlot(xenium_obj, features = features, ncol = ncol) &
+    theme(legend.position = "right")
+}
+
 #make&format title labels
 title_plot <- function(txt, padding = 22, top_margin = 0, bottom_margin = 5){
   ggplot() + 
