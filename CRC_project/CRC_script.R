@@ -5,9 +5,9 @@ library(MAP)
 
 # define path for everything 
 # data folder
-data_folder = "CRC_project/GSE226997" 
+data_folder = "CRC_project/GSE283052" 
 # graphical output folder
-picture_folder = "CRC_project/GSE226997/output"
+picture_folder  = file.path(data_folder, "output") 
 dir.create(picture_folder, showWarnings = FALSE, recursive = TRUE)
 # data checkpoint folder
 cache_folder_og  = file.path(picture_folder, "cache") 
@@ -89,8 +89,10 @@ impute_gene <- function(gene_name, input){
 #---------- end of functions, start main----------
 if (batch_processing){
   
-  # ==== QC ====
+    # ==== QC ====
     folders <- list.files(data_folder, full.names = TRUE)
+    # Only keep actual directories, not files
+    folders <- folders[dir.exists(folders)]
     #initiate variables
     n <- 0
     file_list <- list()
@@ -103,6 +105,8 @@ if (batch_processing){
       if (folder_name == basename(picture_folder)) {
         next
       }
+      
+      
       file_list[[folder_name]] <- folder   # key = file name, value = absolute path
       n = n + 1
     }

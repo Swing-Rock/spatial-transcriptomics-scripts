@@ -6,9 +6,9 @@
 #   get_hnscc_reference(cache_path)           — download/cache the scRNA-seq reference
 #   run_rctd(seurat_obj, reference, ...)      — deconvolve one sample, returns updated Seurat obj
 
+library(Matrix)
 library(Seurat)
 library(spacexr)
-library(Matrix)
 library(ggplot2)
 
 # ── Reference: Puram et al. 2017 (GSE103322) ──────────────────────────────────

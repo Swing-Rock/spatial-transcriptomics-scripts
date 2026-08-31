@@ -49,9 +49,9 @@ add_hpv_status <- function(seurat_obj, hpv_plus_samples) {
 
 
 # ── Step 2: Subset to malignant spots ────────────────────────────────────────
-subset_malignant <- function(seurat_obj, deconv, malignant_labels = NULL) {
+subset_malignant <- function(seurat_obj, deconv, malignant_labels = NULL, xenium = FALSE) {
   cat("----------subsetting malignant spots----------")
-  seurat_obj <- PrepSCTFindMarkers(seurat_obj)
+  if (xenium == TRUE)  DefaultAssay(seurat_obj) <- "Xenium"
   
   if (deconv == FALSE){
     cell_type_col <- "SingleR_label"
@@ -102,6 +102,22 @@ run_de <- function(malignant, out_path, platform = "visium") {
   de_assay <- if (platform == "xenium") "SCT" else "Spatial"
 
   Idents(malignant) <- "hpv_status"
+  
+  # PrepSCTFindMarkers recorrects SCT counts across samples before DE testing.
+  # Only needed for the SCT assay (Xenium platform); Visium uses Spatial directly.
+  # SCT models may still reference "RNA" as their umi.assay (set at SCTransform
+  # time), but after merging Xenium samples the RNA assay is dropped. Remap to
+  # "Xenium" so PrepSCTFindMarkers can locate the raw counts.
+  if (platform == "xenium") {
+    for (i in seq_along(malignant[["SCT"]]@SCTModel.list)) {
+      if (malignant[["SCT"]]@SCTModel.list[[i]]@umi.assay == "RNA") {
+        malignant[["SCT"]]@SCTModel.list[[i]]@umi.assay <- "Xenium"
+      }
+    }
+  }
+  malignant <- PrepSCTFindMarkers(malignant, assay = "SCT")
+  
+  
   
   de_results <- FindMarkers(
     malignant,
@@ -261,7 +277,8 @@ run_spatial_scoring <- function(seurat_obj, go_results, out_path, platform = "vi
       score_col  <- paste0(label, "_", safe_name)
 
       obj <- AddModuleScore(obj, features = list(genes),
-                            name = score_col, assay = "SCT")
+                            name = score_col, assay = "SCT", ,
+                            ctrl     = 5)
       # Seurat appends "1" to the name
       actual_col <- paste0(score_col, "1")
 
@@ -272,7 +289,7 @@ run_spatial_scoring <- function(seurat_obj, go_results, out_path, platform = "vi
       fig_h    <- n_row * 4 + 1.5
 
       if (platform == "xenium") {
-        p <- ImageFeaturePlot(obj, features = actual_col, ncol = n_col) +
+        p <- ImageFeaturePlot(obj, features = actual_col) +
           labs(title = paste(label, "—", term_name)) +
           theme(
             legend.position = "right",

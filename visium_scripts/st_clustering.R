@@ -92,9 +92,14 @@ clustering <- function(data_obj, data_name, out_path, single_cell = TRUE, verbos
       clusters = Idents(data_obj)
     )
     cluster_labels <- pred$labels
-    names(cluster_labels) <- levels(data_obj)
-    data_obj <- RenameIdents(data_obj, cluster_labels)
-    combined <- combined / (DimPlot(data_obj, reduction = "umap", label = TRUE) )
+    names(cluster_labels) <- rownames(pred)
+    
+    # this is the fix - explicitly name by barcodes
+    cell_labels <- cluster_labels[as.character(Idents(data_obj))]
+    names(cell_labels) <- colnames(data_obj)  # overwrite cluster names with barcodes
+    
+    data_obj$SingleR_label <- cell_labels
+    combined <- combined / (DimPlot(data_obj, reduction = "umap", group.by = "SingleR_label", label = TRUE)) 
                             # | SpatialDimPlot(data_obj, label = TRUE, pt.size.factor = 2.5, label.size = 3))
     png(paste0(out_path, "/", data_name, "_annotated_group_cluster_plots.png"), width = 750, height = 1000, res = 150)
     print(combined)
