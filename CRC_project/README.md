@@ -91,7 +91,7 @@ All formats converge on the same `run_qc()` output (a QC'd, normalized Seurat ob
 ### Step 2 — Run QC, pseudobulking, and MAP signature scoring
 
 ```r
-source("visium_scripts/CRC_analysis_mtx_fixed.R")
+source("visium_scripts/CRC_analysis.R")
 ```
 
 This is the main R entry point. For each sample folder found in `data_folder`:
