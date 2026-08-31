@@ -8,9 +8,9 @@ source("scripts/tcga_survival.R")
 
 # define path for everything 
 # data folder
-data_folder = "C:/ongkeko lab works/spatial transcriptomics/GSE281978" 
+data_folder = "GSE281978" 
 # graphical output folder
-picture_folder = "C:/ongkeko lab works/spatial transcriptomics/GSE281978/output"
+picture_folder = "GSE281978/output"
 dir.create(picture_folder, showWarnings = FALSE, recursive = TRUE)
 # data checkpoint folder
 cache_folder  = file.path(picture_folder, "cache") 
@@ -20,12 +20,12 @@ dir.create(cache_folder, showWarnings = FALSE, recursive = TRUE)
 #if there's multiple samples in the folder that need to be merged
 batch_processing <- TRUE 
 # RCTD deconvolution will be ran if true, if false, SingleR will be used to annotate
-deconvolution <- TRUE 
+deconvolution <- FALSE 
 #this only matters if we are not doing deconvolution. if we are, we can ignore this. 
 #TRUE makes it so each spot is labeled a cell type before clustering. it can produce more cell types but it might be noisy
 #FALSE makes it cluster before giving each cluster a cell type label. there might be less cell types but each type would be clearly defined
 #i would run both and compare output if needed
-single_cell_annotation <- TRUE 
+single_cell_annotation <- FALSE 
 
 
 start_time <- Sys.time()
@@ -116,7 +116,7 @@ merge_data <- function(data_list){
     merged_data <- readRDS(merge_cache)
     return (merged_data)
   } else {
-    cat("no merged data found, merging samples")
+    cat("no merged data found, merging samples\n")
     merged_data <- merge_dataset(data_list, picture_folder)
     merged_data <- FindVariableFeatures(merged_data, assay = "SCT", selection.method = "vst", nfeatures = 3000)
     saveRDS(merged_data, merge_cache)
@@ -132,8 +132,8 @@ cluster_n_annotate <- function(merged_data){
     merged_data <- readRDS(cluster_cache)
     return(merged_data)
   } else {
-    cat("no annotated data found, annotating samples")
-    merged_data <- clustering(data_obj = merged_data, data_name = "merged", out_path = picture_folder, single_cell = FALSE)
+    cat("no annotated data found, annotating samples\n")
+    merged_data <- clustering(data_obj = merged_data, data_name = "merged", out_path = picture_folder, single_cell = single_cell_annotation)
     saveRDS(merged_data, cluster_cache)
     cat("\n\nClustered data cache saved to:", cluster_cache, "\n")
     return (merged_data)
@@ -245,6 +245,8 @@ if (batch_processing){
   } else {
     merged_data = merge_data(data_list)
     merged_data = cluster_n_annotate(merged_data)
+    
+    
   }
   
 } else { #NOTE TO SELF: REMEMBER TO ADD DECONVOLUTION CODE TO THIS SOMETIMES... HOPEFULLY this code actually works idk when's the last time ive used it tbh
@@ -259,7 +261,7 @@ run_tcga_survival(
   go_results     = hpv_results$go_results,
   cache_folder   = cache_folder,
   picture_folder = picture_folder,
-  stratify_hpv   = TRUE
+  clinical_csv   = file.path(cache_folder, "survival_data_HNSC.csv") 
 )
 
 
