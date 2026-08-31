@@ -1,4 +1,4 @@
-# CRC / CRLM Spatial Transcriptomics Pipeline
+# CRC Spatial Transcriptomics Pipeline
 
 An end-to-end pipeline for processing spatial transcriptomics data (10x Visium / CytAssist) from colorectal cancer (CRC) and liver metastasis (CRLM) samples — spanning ingestion of heterogeneous GEO data formats, QC, signature scoring, and cell type deconvolution via `cell2location`.
 
