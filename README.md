@@ -1,9 +1,6 @@
 # spatial-transcriptomics-scripts
 Ongkeko Lab spatial transcriptomics data processing pipeline
 
-## flow chart of script dependencies
-[Flowchart.pdf](https://github.com/user-attachments/files/26293063/Flowchart.pdf)
-https://lucid.app/lucidchart/9ca23dbf-cc43-4b66-b452-ce79e9b11e3e/edit?viewport_loc=-547%2C-325%2C3078%2C1476%2C0_0&invitationId=inv_80ce0e20-4ee8-4184-8f4a-6fc41391dc04
 
 ---
 
